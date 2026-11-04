@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 
+
 class Reactor(models.Model):
     name = models.CharField(max_length=100)
     facility = models.CharField(max_length=150)

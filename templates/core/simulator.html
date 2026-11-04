@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>What-If Simulator | RecoverIQ</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            color: #193b35;
+        }
+
+        header {
+            background: #123f36;
+            color: white;
+            padding: 22px 8%;
+        }
+
+        nav a {
+            color: white;
+            margin-right: 22px;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 760px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 3px 14px #00000010;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5d1;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .errorlist {
+            color: #b42318;
+        }
+
+        button {
+            background: #16785e;
+            color: white;
+            border: none;
+            padding: 13px 22px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #105b48;
+        }
+
+        .note {
+            color: #64746e;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>RecoverIQ</h2>
+    <nav>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'simulator' %}">What-If Simulator</a>
+        <a href="{% url 'scenario_history' %}">Scenario History</a>
+    </nav>
+</header>
+
+<main>
+    <h1>What-If Simulator</h1>
+
+    <p>
+        Explore operating conditions for your phosphorus
+        recovery reactor.
+    </p>
+
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.errors %}
+                        {{ field.errors }}
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            {% if form.non_field_errors %}
+                {{ form.non_field_errors }}
+            {% endif %}
+
+            <button type="submit">Save Scenario</button>
+        </form>
+    </div>
+
+    <p class="note">
+        This prototype stores user-defined operating scenarios.
+        AI-based predictions are not yet enabled.
+        No changes are sent to physical reactor equipment.
+    </p>
+</main>
+
+</body>
+</html>

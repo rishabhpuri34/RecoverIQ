@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Scenario History | RecoverIQ</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            color: #193b35;
+        }
+
+        header {
+            background: #123f36;
+            color: white;
+            padding: 22px 8%;
+        }
+
+        nav a {
+            color: white;
+            margin-right: 22px;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 1050px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 13px;
+            border-bottom: 1px solid #e1e8e5;
+        }
+
+        th {
+            background: #eaf2ee;
+        }
+
+        .note {
+            color: #64746e;
+        }
+
+        a {
+            color: #16785e;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>RecoverIQ</h2>
+    <nav>
+        <a href="{% url 'dashboard' %}" style="color:white;">Dashboard</a>
+        <a href="{% url 'simulator' %}" style="color:white;">What-If Simulator</a>
+        <a href="{% url 'scenario_history' %}" style="color:white;">Scenario History</a>
+    </nav>
+</header>
+
+<main>
+    <h1>Scenario History</h1>
+    <p class="note">
+        Saved operating scenarios for your account.
+    </p>
+
+    <div class="card">
+        {% if scenarios %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Scenario</th>
+                        <th>Reactor</th>
+                        <th>MgCl₂ (L/min)</th>
+                        <th>NaOH (L/min)</th>
+                        <th>Feed OP (mg/L)</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for scenario in scenarios %}
+                        <tr>
+                            <td>{{ scenario.name }}</td>
+                            <td>{{ scenario.reactor.name }}</td>
+                            <td>{{ scenario.mgcl2_flow_lpm }}</td>
+                            <td>{{ scenario.naoh_flow_lpm }}</td>
+                            <td>{{ scenario.feed_op_mg_l }}</td>
+                            <td>{{ scenario.created_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No scenarios saved yet.</p>
+            <a href="{% url 'simulator' %}">
+                Create your first scenario
+            </a>
+        {% endif %}
+    </div>
+</main>
+
+</body>
+</html>

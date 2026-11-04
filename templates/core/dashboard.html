@@ -72,14 +72,26 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+        nav a {
+    color: white;
+    margin-right: 20px;
+    text-decoration: none;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
     </style>
 </head>
 
 <body>
-    <header>
-        <h1>{{ app_name }}</h1>
-        <p>{{ tagline }}</p>
-    </header>
+<header>
+    <nav>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'simulator' %}">What-If Simulator</a>
+        <a href="{% url 'scenario_history' %}">Scenario History</a>
+    </nav>
+</header>
 
     <main>
         <h2>Reactor Performance Dashboard</h2>
