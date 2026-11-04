@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login | RecoverIQ</title>
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f4f7f6;
+            font-family: Arial, sans-serif;
+            color: #193b35;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 5px 25px #00000012;
+        }
+
+        h1 {
+            color: #123f36;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #64746e;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 18px 0 7px;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5d1;
+            border-radius: 7px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 13px;
+            background: #16785e;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #105b48;
+        }
+
+        .error {
+            color: #b42318;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <h1>RecoverIQ</h1>
+        <p class="subtitle">Sign in to your reactor dashboard</p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <p class="error">
+                    Invalid username or password. Please try again.
+                </p>
+            {% endif %}
+
+            <label for="id_username">Username</label>
+            {{ form.username }}
+
+            <label for="id_password">Password</label>
+            {{ form.password }}
+
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <button type="submit">Sign In</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -48,7 +48,7 @@ def simulator(request):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 def scenario_history(request):
     scenarios = (
         Scenario.objects

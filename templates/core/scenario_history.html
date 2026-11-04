@@ -61,6 +61,29 @@
         a {
             color: #16785e;
         }
+        .logout-form {
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.logout-button {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.username {
+    color: #d5e8e0;
+    margin-left: 20px;
+    font-size: 13px;
+}
     </style>
 </head>
 
@@ -68,11 +91,29 @@
 
 <header>
     <h2>RecoverIQ</h2>
-    <nav>
-        <a href="{% url 'dashboard' %}" style="color:white;">Dashboard</a>
-        <a href="{% url 'simulator' %}" style="color:white;">What-If Simulator</a>
-        <a href="{% url 'scenario_history' %}" style="color:white;">Scenario History</a>
-    </nav>
+
+<nav>
+    <a href="{% url 'dashboard' %}">Dashboard</a>
+    <a href="{% url 'simulator' %}">What-If Simulator</a>
+    <a href="{% url 'scenario_history' %}">Scenario History</a>
+
+    {% if user.is_authenticated %}
+        <span class="username">
+            Signed in as {{ user.username }}
+        </span>
+
+        <form method="post"
+              action="{% url 'logout' %}"
+              class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-button">
+                Logout
+            </button>
+        </form>
+    {% else %}
+        <a href="{% url 'login' %}">Login</a>
+    {% endif %}
+</nav>
 </header>
 
 <main>
