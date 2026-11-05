@@ -86,6 +86,14 @@ class Scenario(models.Model):
     )
     temperature_c = models.FloatField()
 
+    baseline_conversion = models.FloatField(
+        null=True,
+        blank=True
+    )
+    prediction_warnings = models.JSONField(
+        default=list,
+        blank=True
+    )
     predicted_conversion = models.FloatField(
         null=True,
         blank=True,
@@ -94,6 +102,33 @@ class Scenario(models.Model):
             MaxValueValidator(1)
         ]
     )
+
+    @property
+    def predicted_conversion_percent(self):
+        if self.predicted_conversion is None:
+            return None
+        return self.predicted_conversion * 100
+
+    @property
+    def baseline_conversion_percent(self):
+        if self.baseline_conversion is None:
+            return None
+        return self.baseline_conversion * 100
+
+
+    @property
+    def conversion_difference(self):
+        if (
+            self.predicted_conversion is None
+            or self.baseline_conversion is None
+        ):
+            return None
+
+        return (
+            self.predicted_conversion - self.baseline_conversion
+        ) * 100
+
+
 
     predicted_yield = models.FloatField(
         null=True,

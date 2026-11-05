@@ -124,6 +124,8 @@
 
     <div class="card">
         {% if scenarios %}
+
+
             <table>
                 <thead>
                     <tr>
@@ -132,6 +134,10 @@
                         <th>MgCl₂ (L/min)</th>
                         <th>NaOH (L/min)</th>
                         <th>Feed OP (mg/L)</th>
+                        <th>Baseline Conversion</th>
+                        <th>Predicted Conversion</th>
+                        <th>Predicted Difference (pp)</th>
+                        <th>Model Warnings</th>
                         <th>Created</th>
                     </tr>
                 </thead>
@@ -139,14 +145,69 @@
                 <tbody>
                     {% for scenario in scenarios %}
                         <tr>
-                            <td>{{ scenario.name }}</td>
-                            <td>{{ scenario.reactor.name }}</td>
-                            <td>{{ scenario.mgcl2_flow_lpm }}</td>
-                            <td>{{ scenario.naoh_flow_lpm }}</td>
-                            <td>{{ scenario.feed_op_mg_l }}</td>
-                            <td>{{ scenario.created_at|date:"M d, Y H:i" }}</td>
-                        </tr>
-                    {% endfor %}
+    <td>{{ scenario.name }}</td>
+    <td>{{ scenario.reactor }}</td>
+    <td>{{ scenario.mgcl2_flow_lpm }}</td>
+    <td>{{ scenario.naoh_flow_lpm }}</td>
+    <td>{{ scenario.feed_op_mg_l }}</td>
+
+
+<td>
+    {% if scenario.baseline_conversion_percent is not None %}
+        {{ scenario.baseline_conversion_percent|floatformat:2 }}%
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+
+
+    <!-- NEW: Predicted Conversion -->
+    <td>
+        {% if scenario.predicted_conversion_percent is not None %}
+            <strong>
+                {{ scenario.predicted_conversion_percent|floatformat:2 }}%
+            </strong>
+        {% else %}
+            —
+        {% endif %}
+    </td>
+
+                            <td>
+    {% if scenario.conversion_difference is not None %}
+        {% if scenario.conversion_difference > 0 %}
+            <strong style="color: #15803d;">
+                +{{ scenario.conversion_difference|floatformat:2 }} pp
+            </strong>
+        {% elif scenario.conversion_difference < 0 %}
+            <strong style="color: #b91c1c;">
+                {{ scenario.conversion_difference|floatformat:2 }} pp
+            </strong>
+        {% else %}
+            0.00 pp
+        {% endif %}
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+<td>
+    {% if scenario.prediction_warnings %}
+        <strong style="color: #b45309;">⚠ Outside training range</strong>
+        <ul style="margin: 5px 0; padding-left: 18px;">
+            {% for warning in scenario.prediction_warnings %}
+                <li>{{ warning }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+
+    <td>{{ scenario.created_at }}</td>
+</tr>
+{% endfor %}
                 </tbody>
             </table>
         {% else %}

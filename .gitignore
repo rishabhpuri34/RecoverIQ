@@ -26,3 +26,7 @@ db.sqlite3-journal
 data/private/
 *.joblib
 *.pkl
+
+# Private ML model and historical reactor baseline
+/ml_models/*.pkl
+/ml_models/*.json

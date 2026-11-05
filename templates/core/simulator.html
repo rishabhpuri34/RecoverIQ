@@ -137,6 +137,8 @@
 </header>
 
 <main>
+
+<main>
     <h1>What-If Simulator</h1>
 
     <p>
@@ -144,7 +146,35 @@
         recovery reactor.
     </p>
 
+    <div style="
+        padding: 14px;
+        margin: 15px 0 20px 0;
+        background-color: #f0f7ff;
+        border-left: 4px solid #2563eb;
+        border-radius: 5px;
+        line-height: 1.6;
+    ">
+        <strong>About this prediction model</strong>
+
+        <p style="margin: 8px 0 0 0;">
+            RecoverIQ uses a Ridge Regression model trained on
+            historical struvite reactor operating data to estimate
+            phosphorus conversion.
+
+            Predictions are preliminary and represent statistical
+            associations, not guaranteed outcomes from changing
+            chemical doses or other operating conditions.
+
+            The model currently uses a fixed historical baseline
+            rather than live reactor measurements.
+
+            Predictions outside historical operating ranges may
+            be unreliable.
+        </p>
+    </div>
+
     <div class="card">
+
         <form method="post">
             {% csrf_token %}
 
@@ -170,11 +200,16 @@
         </form>
     </div>
 
-    <p class="note">
-        This prototype stores user-defined operating scenarios.
-        AI-based predictions are not yet enabled.
-        No changes are sent to physical reactor equipment.
-    </p>
+
+<p class="note">
+    RecoverIQ is a research prototype. Model predictions are
+    generated from historical data and saved with each scenario.
+    Recycle flow is recorded but does not currently influence
+    the prediction. No changes are sent to physical reactor
+    equipment. Predictions should not be used as operational
+    recommendations without further validation.
+</p>
+
 </main>
 
 </body>
