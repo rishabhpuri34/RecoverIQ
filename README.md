@@ -126,21 +126,50 @@ python manage.py runserver
 
 Open http://127.0.0.1:8000/ in your browser.
 
-### 8. Machine learning model requirements
+### 8. Install the private machine learning model
 
-The prediction feature requires two private files in the `ml_models/` directory:
+RecoverIQ uses a trained Ridge Regression model and a historical baseline observation to generate phosphorus conversion predictions.
+
+For research confidentiality, the model artifacts are not included in the public GitHub repository.
+
+The following files are required:
 
 - `recoveriq_ridge_practical_v1.pkl`
 - `recoveriq_baseline_v1.json`
 
-These files are not included in this public repository.
+**For authorized course evaluation:**
 
-Without them, the Django application may start, but submitting a prediction scenario will not work. The trained model and baseline data are retained privately for the course demonstration.
+1. Obtain `RecoverIQ_Private_Model_Files.zip` directly from the project developer after permission to share the artifacts has been confirmed.
+2. Create an `ml_models/` directory inside the RecoverIQ project folder if it does not already exist.
+3. Extract both files from the private ZIP into `ml_models/`.
+
+The resulting directory structure should be:
+
+```text
+RecoverIQ/
+├── core/
+├── ml_models/
+│   ├── recoveriq_ridge_practical_v1.pkl
+│   └── recoveriq_baseline_v1.json
+├── manage.py
+├── requirements.txt
+└── README.md
+```
+
+4. Start the Django development server using `python manage.py runserver`.
+5. Log in to the application and open the scenario simulator.
+6. Enter operating conditions, submit a scenario, and review the predicted phosphorus conversion and historical baseline comparison.
+
+**Important:** Model artifacts should only be obtained from an authorized, trusted source. Serialized Python model files (`.pkl`) should never be loaded from unknown sources.
+
+Without these private files, the application can start, but ML predictions cannot be generated.
+
+The original historical training dataset is not required to run the application and is not included in the demonstration package.
 
 ## Project Status
 
 This repository contains a functional research prototype developed for INFO 490.
 
-The current development milestone is the November 9, 2026 P2-A3 submission.
+The current development milestone is the November 16, 2026 P2-A3 first-draft submission.
 
 Future work includes improving model validation, simulator usability, prediction reliability, and deployment readiness.
