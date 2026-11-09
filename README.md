@@ -166,6 +166,30 @@ Without these private files, the application can start, but ML predictions canno
 
 The original historical training dataset is not required to run the application and is not included in the demonstration package.
 
+## Automated Testing
+
+RecoverIQ includes automated tests using Django's built-in testing framework.
+
+To run the tests, activate the Python virtual environment and execute:
+
+```bash
+python manage.py test core
+```
+
+The current test suite includes five tests:
+
+1. Homepage availability
+2. Simulator authentication requirement
+3. Scenario history authentication requirement
+4. User-specific scenario history privacy
+5. Scenario prediction and database persistence
+
+The prediction workflow test uses mocked model outputs, allowing it to verify Django integration without requiring access to the private trained model or historical dataset.
+
+**Latest local test result:** 5 tests passed, 0 failures (November 2026).
+
+These tests verify selected application behaviors but do not independently evaluate the predictive accuracy of the Ridge Regression model.
+
 ## Project Status
 
 This repository contains a functional research prototype developed for INFO 490.
