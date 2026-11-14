@@ -1,36 +1,162 @@
 
-from django.shortcuts import render
-from .models import Reactor, ReactorObservation
-from django.contrib.auth.decorators import login_required
+import json
+import logging
+import math
+from pathlib import Path
+
+from django.conf import settings
 from django.shortcuts import render, redirect
-from .forms import ScenarioForm
+from django.contrib.auth.decorators import login_required
+
 from .models import Reactor, ReactorObservation, Scenario
+from .forms import ScenarioForm
 from .ml_predictor import predict_conversion, check_training_ranges
-from django.contrib import messages
+
+
+logger = logging.getLogger(__name__)
+
+MODEL_VERSION = "ridge_practical_v1"
+PHOSPHORUS_MG_PER_MMOL = 30.973762
+
+
+def valid_conversion(value):
+    """Check whether conversion is a finite fraction from 0 to 1."""
+    if value is None:
+        return False
+
+    try:
+        number = float(value)
+        return math.isfinite(number) and 0.0 <= number <= 1.0
+    except (ValueError, TypeError):
+        return False
+
+
+def get_baseline_feed_tp():
+    """Load baseline Feed TP concentration in mM."""
+    baseline_path = (
+        Path(settings.BASE_DIR)
+        / "ml_models"
+        / "recoveriq_baseline_v1.json"
+    )
+
+    try:
+        with open(baseline_path, "r") as file:
+            baseline_data = json.load(file)
+
+        return float(
+            baseline_data["features"]["FEED TP mM"]
+        )
+
+    except (OSError, ValueError, TypeError, KeyError):
+        logger.exception(
+            "Could not load RecoverIQ baseline Feed TP"
+        )
+        return None
+
+
+def get_scenario_overrides(scenario):
+    """Convert saved scenario inputs into ML feature names."""
+    return {
+        "DOSE Mg Flow LPM": float(scenario.mgcl2_flow_lpm),
+        "DOSE Na Flow LPM": float(scenario.naoh_flow_lpm),
+        "FEED OP mM": (
+            float(scenario.feed_op_mg_l)
+            / PHOSPHORUS_MG_PER_MMOL
+        ),
+        "Temperature C": float(scenario.temperature_c),
+    }
+
+
+def scenario_inputs_supported(scenario, baseline_feed_tp):
+    """Check historical ranges and physical Feed OP constraint."""
+    try:
+        overrides = get_scenario_overrides(scenario)
+
+        if not all(
+            math.isfinite(value)
+            for value in overrides.values()
+        ):
+            return False
+
+        if check_training_ranges(overrides):
+            return False
+
+        if baseline_feed_tp is None:
+            return False
+
+        feed_op = overrides["FEED OP mM"]
+
+        if not (0 < feed_op <= baseline_feed_tp):
+            return False
+
+        return True
+
+    except (ValueError, TypeError):
+        return False
 
 
 def dashboard(request):
-    latest_observation = (
+    observations = (
         ReactorObservation.objects
         .select_related("reactor")
-        .order_by("-timestamp")
-        .first()
+        .order_by("timestamp")
     )
+
+    latest_observation = observations.last()
+    recent_scenarios = []
+
+    if request.user.is_authenticated:
+        baseline_feed_tp = get_baseline_feed_tp()
+
+        saved_scenarios = (
+            Scenario.objects
+            .filter(user=request.user)
+            .select_related("reactor")
+            .order_by("-created_at")
+        )
+
+        for scenario in saved_scenarios:
+            if not valid_conversion(
+                scenario.predicted_conversion
+            ):
+                continue
+
+            if not valid_conversion(
+                scenario.baseline_conversion
+            ):
+                continue
+
+            if not scenario_inputs_supported(
+                scenario,
+                baseline_feed_tp
+            ):
+                continue
+
+            recent_scenarios.append(scenario)
+
+            if len(recent_scenarios) == 3:
+                break
 
     context = {
         "app_name": "RecoverIQ",
         "tagline": "Clearer insights. Smarter recovery.",
         "reactor_count": Reactor.objects.count(),
-        "observation_count": ReactorObservation.objects.count(),
+        "observation_count": observations.count(),
         "latest_observation": latest_observation,
+        "historical_observations": observations,
+        "recent_scenarios": recent_scenarios,
     }
 
-    return render(request, "core/dashboard.html", context)
-
+    return render(
+        request,
+        "core/dashboard.html",
+        context
+    )
 
 
 @login_required(login_url="/admin/login/")
 def simulator(request):
+
     if request.method == "POST":
         form = ScenarioForm(request.POST)
 
@@ -38,29 +164,31 @@ def simulator(request):
             scenario = form.save(commit=False)
             scenario.user = request.user
 
-            # Map form inputs to model feature names.
-            # Only MgCl2 and NaOH dosing are used at this stage.
-
-            # Convert feed orthophosphate from mg/L as P to mM
-            feed_op_mM = float(scenario.feed_op_mg_l) / 30.973762
-
-            overrides = {
-                "DOSE Mg Flow LPM": float(scenario.mgcl2_flow_lpm),
-                "DOSE Na Flow LPM": float(scenario.naoh_flow_lpm),
-                "FEED OP mM": feed_op_mM,
-                "Temperature C": float(scenario.temperature_c),
-            }
-            warnings = check_training_ranges(overrides)
-            scenario.prediction_warnings = warnings
-
-            # Predict phosphorus conversion
-
             try:
+                overrides = get_scenario_overrides(scenario)
+
+                # STEP 1: Check historical training ranges.
+                warnings = check_training_ranges(overrides)
+
+                if warnings:
+                    for warning in warnings:
+                        form.add_error(None, str(warning))
+
+                    return render(
+                        request,
+                        "core/simulator.html",
+                        {"form": form}
+                    )
+
+                # STEP 2: Generate model predictions.
                 predicted_conversion = predict_conversion(
                     overrides=overrides
                 )
-            except ValueError as error:
-                form.add_error("feed_op_mg_l", str(error))
+
+                baseline_conversion = predict_conversion()
+
+            except (ValueError, TypeError) as error:
+                form.add_error(None, str(error))
 
                 return render(
                     request,
@@ -68,18 +196,80 @@ def simulator(request):
                     {"form": form}
                 )
 
-            # Store model prediction in the scenario
-            scenario.predicted_conversion = predicted_conversion
-            scenario.baseline_conversion = predict_conversion()
-            scenario.model_version = "ridge_practical_v1"
+            except Exception:
+                logger.exception(
+                    "RecoverIQ prediction failed"
+                )
 
-            # Save scenario and prediction
+                form.add_error(
+                    None,
+                    "The prediction could not be completed. "
+                    "Please try again or contact the administrator."
+                )
+
+                return render(
+                    request,
+                    "core/simulator.html",
+                    {"form": form}
+                )
+
+            # STEP 3: Validate predicted conversion.
+            if not valid_conversion(predicted_conversion):
+                form.add_error(
+                    None,
+                    "The model produced an invalid conversion. "
+                    "This prediction cannot be saved."
+                )
+
+                return render(
+                    request,
+                    "core/simulator.html",
+                    {"form": form}
+                )
+
+            if not valid_conversion(baseline_conversion):
+                form.add_error(
+                    None,
+                    "The model baseline is invalid. "
+                    "Please check the trained model."
+                )
+
+                return render(
+                    request,
+                    "core/simulator.html",
+                    {"form": form}
+                )
+
+            # STEP 4: Save scenario and model metadata.
+            scenario.predicted_conversion = predicted_conversion
+            scenario.baseline_conversion = baseline_conversion
+            scenario.prediction_warnings = []
+            scenario.model_version = MODEL_VERSION
 
             scenario.save()
 
+            # STEP 5: Verify the persisted model version.
+            saved_model_version = (
+                Scenario.objects
+                .filter(pk=scenario.pk)
+                .values_list("model_version", flat=True)
+                .first()
+            )
+
+            if saved_model_version != MODEL_VERSION:
+                logger.error(
+                    "Model version mismatch for scenario %s: %r",
+                    scenario.pk,
+                    saved_model_version
+                )
+            else:
+                logger.info(
+                    "Scenario %s saved with model version %s",
+                    scenario.pk,
+                    saved_model_version
+                )
 
             return redirect("scenario_history")
-
 
     else:
         form = ScenarioForm()
@@ -91,7 +281,6 @@ def simulator(request):
     )
 
 
-
 @login_required
 def scenario_history(request):
     scenarios = (
@@ -101,9 +290,39 @@ def scenario_history(request):
         .order_by("-created_at")
     )
 
+    baseline_feed_tp = get_baseline_feed_tp()
+
+    for scenario in scenarios:
+
+        if scenario.predicted_conversion is None:
+            scenario.display_status = "incomplete"
+
+        elif not valid_conversion(
+            scenario.predicted_conversion
+        ):
+            scenario.display_status = "invalid"
+
+        elif scenario.baseline_conversion is None:
+            scenario.display_status = "incomplete"
+
+        elif not valid_conversion(
+            scenario.baseline_conversion
+        ):
+            scenario.display_status = "invalid"
+
+        elif not scenario_inputs_supported(
+            scenario,
+            baseline_feed_tp
+        ):
+            scenario.display_status = "unsupported"
+
+        else:
+            scenario.display_status = "within_ranges"
+
+        # Saved scenario records are not modified.
+
     return render(
         request,
         "core/scenario_history.html",
         {"scenarios": scenarios}
     )
-

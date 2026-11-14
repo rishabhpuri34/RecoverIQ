@@ -3,214 +3,1552 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>What-If Simulator | RecoverIQ</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f6;
             margin: 0;
-            color: #193b35;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #f4f7f6;
+            color: #243b35;
+            font-size: 18px;
+            line-height: 1.6;
         }
 
-        header {
-            background: #123f36;
-            color: white;
-            padding: 22px 8%;
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
         }
 
-        nav a {
+        /* ===== SIDEBAR ===== */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 270px;
+            background: #123e37;
+            padding: 30px 18px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 4px 12px 26px;
+            border-bottom: 1px solid rgba(255,255,255,0.16);
+            margin-bottom: 22px;
+        }
+
+        .sidebar-brand h2 {
             color: white;
-            margin-right: 22px;
+            font-size: 31px;
+            font-weight: 800;
+            letter-spacing: -0.7px;
+            margin: 0 0 9px;
+        }
+
+        .sidebar-brand p {
+            color: #a9d9c8;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-nav a {
+            color: #d5e8e0;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 1.4;
+            padding: 15px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(2px);
+        }
+
+        .sidebar-nav a.active {
+            background: #168065;
+            color: white;
+            font-weight: 700;
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            width: 24px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 20px 12px 0;
+            border-top: 1px solid rgba(255,255,255,0.16);
+        }
+
+        .username {
+            color: #d5e8e0;
+            font-size: 17px;
+            line-height: 1.6;
+            display: block;
+            margin-bottom: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-button {
+            width: 100%;
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 7px;
+            padding: 12px 14px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .login-link {
+            display: block;
+            text-align: center;
             text-decoration: none;
         }
 
+        /* ===== MAIN CONTENT ===== */
+
         main {
-            max-width: 760px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 26px 30px 36px 300px;
+            padding: 0;
+            min-width: 0;
+        }
+
+        /* ===== PAGE HEADER ===== */
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            padding: 8px 0 18px;
+            border-bottom: 1px solid #dce5e1;
+            margin-bottom: 22px;
+        }
+
+        .eyebrow {
+            color: #168065;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 9px;
+        }
+
+        .page-header h1 {
+            margin: 0 0 8px;
+            font-size: 40px;
+            font-weight: 800;
+            line-height: 1.25;
+            color: #243b35;
+            letter-spacing: -0.5px;
+        }
+
+        .page-description {
+            margin: 0;
+            color: #687b74;
+            font-size: 20px;
+            line-height: 1.6;
+        }
+
+        /* ===== TWO-COLUMN SIMULATOR ===== */
+
+        .simulator-layout {
+            display: grid;
+            grid-template-columns:
+                minmax(0, 1.35fr)
+                minmax(0, 1fr);
+            gap: 20px;
+            align-items: start;
         }
 
         .card {
             background: white;
+            border: 1px solid #dce5e1;
             border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 3px 14px #00000010;
+            padding: 28px;
+            min-width: 0;
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
         }
+
+        .card:hover {
+            border-color: #c7dcd2;
+            box-shadow: 0 5px 18px rgba(18,62,55,0.04);
+        }
+
+        .card-title {
+            font-size: 27px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: #243b35;
+            line-height: 1.35;
+        }
+
+        .card-description {
+            font-size: 19px;
+            line-height: 1.65;
+            color: #687b74;
+            margin: 0 0 23px;
+        }
+
+        /* ===== FORM ===== */
 
         .field {
-            margin-bottom: 20px;
+            margin-bottom: 23px;
         }
 
-        label {
+        .field label {
             display: block;
-            font-weight: bold;
-            margin-bottom: 7px;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 9px;
+            color: #29463d;
+            line-height: 1.45;
         }
 
-        input, select {
+        .field input,
+        .field select,
+        .field textarea {
+            display: block;
             width: 100%;
-            padding: 11px;
+            min-height: 53px;
+            padding: 13px 15px;
             border: 1px solid #cbd5d1;
-            border-radius: 6px;
-            box-sizing: border-box;
+            border-radius: 8px;
+            background: white;
+            color: #243b35;
+            font-size: 19px;
+            line-height: 1.5;
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
         }
+
+        .field textarea {
+            min-height: 105px;
+            resize: vertical;
+        }
+
+        .field input:hover,
+        .field select:hover,
+        .field textarea:hover {
+            border-color: #96b9aa;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: #168065;
+            box-shadow: 0 0 0 3px rgba(22,128,101,0.14);
+        }
+
+        .field input::placeholder,
+        .field textarea::placeholder {
+            color: #87988f;
+        }
+
+        /* ===== HISTORICAL RANGE GUIDANCE ===== */
+
+        .range-hint {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 9px 0 0;
+            color: #60776d;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        .range-hint::before {
+            content: "ⓘ";
+            color: #168065;
+            font-size: 19px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .range-hint.secondary {
+            color: #687b74;
+        }
+
+        .field-help {
+            margin: 8px 0 0;
+            font-size: 17px;
+            line-height: 1.6;
+            color: #687b74;
+        }
+
+        /* ===== LIVE RANGE FEEDBACK ===== */
+
+        .live-range-feedback {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 11px 14px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .live-range-feedback.within-range {
+            background: #eaf6ef;
+            color: #167344;
+            border: 1px solid #c7e8d3;
+        }
+
+        .live-range-feedback.outside-range {
+            background: #fff4ee;
+            color: #a74422;
+            border: 1px solid #f1d3c5;
+        }
+
+        .live-range-feedback.empty-range {
+            background: #f4f7f6;
+            color: #687b74;
+            border: 1px solid #e1e8e5;
+        }
+
+        .feedback-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            line-height: 1.3;
+        }
+
+        .field input.range-valid {
+            border-color: #168065;
+        }
+
+        .field input.range-warning {
+            border-color: #c46a45;
+        }
+
+        /* ===== SCENARIO INPUT SUMMARY ===== */
+
+        .input-summary {
+            margin: 25px 0 0;
+            padding: 21px;
+            border: 1px solid #dce5e1;
+            border-radius: 11px;
+            background: #f8fbf9;
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .summary-title {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 700;
+            color: #29463d;
+        }
+
+        .summary-count {
+            font-size: 20px;
+            font-weight: 800;
+            color: #168065;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .summary-progress {
+            height: 11px;
+            background: #e3ebe6;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .summary-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #168065;
+            border-radius: 20px;
+            transition: width 0.25s ease;
+        }
+
+        .summary-message {
+            margin: 0;
+            font-size: 17px;
+            line-height: 1.65;
+            color: #60776d;
+        }
+
+        .summary-detail {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 15px;
+        }
+
+        .summary-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 7px;
+            padding: 7px 11px;
+            font-size: 15px;
+            font-weight: 600;
+            background: #edf0f2;
+            color: #65716d;
+        }
+
+        .summary-chip.valid {
+            background: #e8f5ed;
+            color: #16785e;
+        }
+
+        .summary-chip.warning {
+            background: #fff3df;
+            color: #9a5700;
+        }
+
+        .summary-chip.missing {
+            background: #edf0f2;
+            color: #65716d;
+        }
+
+        .summary-disclaimer {
+            margin: 15px 0 0;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #687b74;
+        }
+
+        /* ===== VALIDATION ERRORS ===== */
 
         .errorlist {
             color: #b42318;
+            background: #fff4f2;
+            border: 1px solid #f5d5d0;
+            border-radius: 8px;
+            padding: 12px 14px 12px 32px;
+            margin: 10px 0;
+            font-size: 17px;
+            line-height: 1.6;
         }
 
-        button {
-            background: #16785e;
+        /* ===== SUBMIT BUTTON ===== */
+
+        .form-footer {
+            border-top: 1px solid #e5ece8;
+            padding-top: 22px;
+            margin-top: 24px;
+        }
+
+        .submit-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #168065;
             color: white;
             border: none;
-            padding: 13px 22px;
-            border-radius: 7px;
+            padding: 16px 24px;
+            border-radius: 9px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 20px;
+            line-height: 1.4;
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
         }
 
-        button:hover {
-            background: #105b48;
+        .submit-button:hover {
+            background: #116c55;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 14px rgba(22,128,101,0.18);
         }
 
-        .note {
-            color: #64746e;
-            font-size: 14px;
+        .submit-button:focus-visible {
+            outline: 3px solid #80bda7;
+            outline-offset: 3px;
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .submit-button .arrow {
+            font-size: 23px;
+            line-height: 1;
+        }
+
+        /* ===== MODEL INFORMATION ===== */
+
+        .info-card {
+            background: white;
+        }
+
+        .model-badge {
+            display: inline-block;
+            background: #eaf3ef;
+            color: #16785e;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 17px;
+        }
+
+        .info-section {
+            margin-top: 22px;
+            padding-top: 20px;
+            border-top: 1px solid #e5ece8;
+        }
+
+        .info-section h3 {
+            font-size: 21px;
+            font-weight: 700;
+            margin: 0 0 11px;
+            color: #29463d;
+            line-height: 1.4;
+        }
+
+        .info-section p {
+            color: #687b74;
+            font-size: 18px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* ===== PREDICTION INPUTS ===== */
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 14px 0 0;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 0;
+            border-bottom: 1px solid #edf2ef;
+            color: #425e53;
+            font-size: 18px;
+            font-weight: 500;
             line-height: 1.5;
         }
-        .logout-form {
-    display: inline-block;
-    margin-left: 15px;
-}
 
-.logout-button {
-    background: transparent;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 6px;
-    padding: 8px 14px;
-    cursor: pointer;
-}
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
 
-.logout-button:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
+        .feature-dot {
+            display: inline-block;
+            flex-shrink: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #168065;
+        }
 
-.username {
-    color: #d5e8e0;
-    margin-left: 20px;
-    font-size: 13px;
-}
+        /* ===== RESEARCH WARNING ===== */
+
+        .important-note {
+            background: #fff9ee;
+            border: 1px solid #f0dfb6;
+            border-left: 4px solid #d5a04a;
+            border-radius: 9px;
+            padding: 18px;
+            margin-top: 24px;
+        }
+
+        .important-note strong {
+            display: block;
+            color: #8a5a12;
+            font-size: 19px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .important-note p {
+            color: #745d39;
+            font-size: 17px;
+            line-height: 1.7;
+            margin: 9px 0 0;
+        }
+
+        /* ===== FOOTNOTE ===== */
+
+        .bottom-note {
+            margin-top: 24px;
+            padding: 18px 20px;
+            background: #ffffff;
+            border: 1px solid #dce5e1;
+            border-radius: 9px;
+            color: #687b74;
+            font-size: 17px;
+            line-height: 1.75;
+        }
+
+        /* ===== RESPONSIVE LAYOUT ===== */
+
+        @media (max-width: 1200px) {
+            .simulator-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 950px) {
+            .sidebar {
+                width: 205px;
+                padding: 24px 12px;
+            }
+
+            main {
+                margin: 24px 20px 40px 225px;
+            }
+
+            .sidebar-nav a {
+                font-size: 15px;
+            }
+
+            .page-header h1 {
+                font-size: 30px;
+            }
+
+            .page-description {
+                font-size: 17px;
+            }
+
+            .card-title {
+                font-size: 25px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sidebar {
+                width: 165px;
+                padding: 20px 8px;
+            }
+
+            .sidebar-brand h2 {
+                font-size: 20px;
+            }
+
+            .sidebar-nav a {
+                font-size: 13px;
+                padding: 12px 9px;
+                gap: 5px;
+            }
+
+            main {
+                margin: 20px 12px 30px 177px;
+            }
+
+            .page-header h1 {
+                font-size: 26px;
+            }
+
+            .card {
+                padding: 17px;
+            }
+
+            .card-title {
+                font-size: 22px;
+            }
+
+            .field label {
+                font-size: 17px;
+            }
+
+            .field input,
+            .field select,
+            .field textarea {
+                font-size: 17px;
+            }
+
+            .range-hint,
+            .field-help,
+            .live-range-feedback {
+                font-size: 15px;
+            }
+
+            .submit-button {
+                width: 100%;
+                font-size: 17px;
+                padding: 15px 12px;
+            }
+
+            .info-section h3 {
+                font-size: 19px;
+            }
+
+            .info-section p,
+            .feature-list li {
+                font-size: 16px;
+            }
+
+            .input-summary {
+                padding: 15px;
+            }
+
+            .summary-title {
+                font-size: 18px;
+            }
+
+            .summary-message {
+                font-size: 15px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sidebar-nav a,
+            .card,
+            .submit-button,
+            .field input,
+            .field select,
+            .field textarea,
+            .summary-progress-fill {
+                transition: none;
+            }
+
+            .sidebar-nav a:hover,
+            .submit-button:hover {
+                transform: none;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-<header>
-    <h2>RecoverIQ</h2>
+<!-- ===== SIDEBAR ===== -->
 
-<nav>
-    <a href="{% url 'dashboard' %}">Dashboard</a>
-    <a href="{% url 'simulator' %}">What-If Simulator</a>
-    <a href="{% url 'scenario_history' %}">Scenario History</a>
+<aside class="sidebar">
 
-    {% if user.is_authenticated %}
-        <span class="username">
-            Signed in as {{ user.username }}
-        </span>
+    <div class="sidebar-brand">
+        <h2>RecoverIQ</h2>
+        <p>Phosphorus Recovery</p>
+    </div>
 
-        <form method="post"
-              action="{% url 'logout' %}"
-              class="logout-form">
-            {% csrf_token %}
-            <button type="submit" class="logout-button">
-                Logout
-            </button>
-        </form>
-    {% else %}
-        <a href="{% url 'login' %}">Login</a>
-    {% endif %}
-</nav>
+    <nav class="sidebar-nav" aria-label="Main navigation">
 
-</header>
+        <a href="{% url 'dashboard' %}">
+            <span class="nav-icon">&#9638;</span>
+            Dashboard
+        </a>
+
+        <a href="{% url 'simulator' %}"
+           class="active"
+           aria-current="page">
+            <span class="nav-icon">&#9881;</span>
+            What-If Simulator
+        </a>
+
+        <a href="{% url 'scenario_history' %}">
+            <span class="nav-icon">&#9776;</span>
+            Scenario History
+        </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+        {% if user.is_authenticated %}
+
+            <span class="username">
+                Signed in as<br>
+                <strong>{{ user.username }}</strong>
+            </span>
+
+            <form method="post"
+                  action="{% url 'logout' %}"
+                  class="logout-form">
+
+                {% csrf_token %}
+
+                <button type="submit"
+                        class="logout-button">
+                    Logout
+                </button>
+
+            </form>
+
+        {% else %}
+
+            <a href="{% url 'login' %}"
+               class="logout-button login-link">
+                Login
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</aside>
+
+<!-- ===== MAIN SIMULATOR ===== -->
 
 <main>
 
-<main>
-    <h1>What-If Simulator</h1>
+    <!-- PAGE HEADER -->
 
-    <p>
-        Explore operating conditions for your phosphorus
-        recovery reactor.
+    <section class="page-header">
+
+        <div>
+
+            <div class="eyebrow">
+                AI-Powered Phosphorus Recovery
+            </div>
+
+            <h1>What-If Simulator</h1>
+
+            <p class="page-description">
+                Explore reactor operating scenarios and estimate
+                phosphorus conversion using a historical
+                machine learning model.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- ===== TWO-COLUMN LAYOUT ===== -->
+
+    <div class="simulator-layout">
+
+        <!-- LEFT: SCENARIO SETUP -->
+
+        <section class="card">
+
+            <h2 class="card-title">
+                Scenario Setup
+            </h2>
+
+            <p class="card-description">
+                Enter the reactor and operating conditions
+                you want to evaluate.
+            </p>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                {% for field in form %}
+
+                    <div class="field">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        <!-- HISTORICAL OPERATING RANGES -->
+
+                        {% if field.name == "mgcl2_flow_lpm" %}
+
+                            <p class="range-hint">
+                                Historical training range:
+                                0.119–0.809 L/min
+                            </p>
+
+                        {% elif field.name == "naoh_flow_lpm" %}
+
+                            <p class="range-hint">
+                                Historical training range:
+                                0.117–0.710 L/min
+                            </p>
+
+                        {% elif field.name == "feed_op_mg_l" %}
+
+                            <p class="range-hint">
+                                Historical training range:
+                                60.607–175.021 mg/L as P.
+                                Feed OP must also not exceed
+                                the fixed baseline TP.
+                            </p>
+
+                        {% elif field.name == "temperature_c" %}
+
+                            <p class="range-hint">
+                                Historical training range:
+                                10.272–22.701 °C
+                            </p>
+
+                        {% elif field.name == "recycle_flow_lpm" %}
+
+                            <p class="range-hint secondary">
+                                Recorded for scenario tracking;
+                                not currently used in the ML prediction.
+                            </p>
+
+                        {% endif %}
+
+                        {% if field.help_text %}
+
+                            <p class="field-help">
+                                {{ field.help_text }}
+                            </p>
+
+                        {% endif %}
+
+                        {% if field.errors %}
+                            {{ field.errors }}
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+                {% if form.non_field_errors %}
+                    {{ form.non_field_errors }}
+                {% endif %}
+
+                <!-- ===== LIVE SCENARIO INPUT SUMMARY ===== -->
+
+                <div class="input-summary"
+                     id="scenario-input-summary"
+                     aria-label="Scenario input range summary">
+
+                    <div class="summary-header">
+
+                        <h3 class="summary-title">
+                            Scenario Input Summary
+                        </h3>
+
+                        <span class="summary-count"
+                              id="summary-count">
+                            0 / 4
+                        </span>
+
+                    </div>
+
+                    <div class="summary-progress"
+                         role="progressbar"
+                         aria-label="Inputs within historical ranges"
+                         aria-valuemin="0"
+                         aria-valuemax="4"
+                         aria-valuenow="0"
+                         id="summary-progress">
+
+                        <div class="summary-progress-fill"
+                             id="summary-progress-fill">
+                        </div>
+
+                    </div>
+
+                    <p class="summary-message"
+                       id="summary-message"
+                       aria-live="polite">
+                        Enter operating values to check
+                        their historical training ranges.
+                    </p>
+
+                    <div class="summary-detail">
+
+                        <span class="summary-chip missing"
+                              id="chip-mgcl2_flow_lpm">
+                            MgCl₂: Not entered
+                        </span>
+
+                        <span class="summary-chip missing"
+                              id="chip-naoh_flow_lpm">
+                            NaOH: Not entered
+                        </span>
+
+                        <span class="summary-chip missing"
+                              id="chip-feed_op_mg_l">
+                            Feed OP: Not entered
+                        </span>
+
+                        <span class="summary-chip missing"
+                              id="chip-temperature_c">
+                            Temperature: Not entered
+                        </span>
+
+                    </div>
+
+                    <p class="summary-disclaimer">
+                        This summary checks individual historical
+                        input ranges only. It does not validate
+                        combinations of operating conditions or
+                        guarantee prediction reliability.
+                    </p>
+
+                </div>
+
+                {% if form.non_field_errors %}
+                    <!-- Errors are displayed above the summary. -->
+                {% endif %}
+
+                <!-- ===== SUBMIT ===== -->
+
+                <div class="form-footer">
+
+                    <button type="submit"
+                            class="submit-button">
+
+                        <span>Predict &amp; Save Scenario</span>
+                        <span class="arrow" aria-hidden="true">&rarr;</span>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+        <!-- RIGHT: MODEL INFORMATION -->
+
+        <aside class="card info-card">
+
+            <span class="model-badge">
+                Machine Learning Model
+            </span>
+
+            <h2 class="card-title">
+                How RecoverIQ Predicts
+            </h2>
+
+            <p class="card-description"
+               style="margin-bottom: 0;">
+                RecoverIQ uses a Ridge Regression model
+                trained on historical struvite reactor
+                operating data to estimate phosphorus
+                conversion.
+            </p>
+
+            <div class="info-section">
+
+                <h3>Prediction Inputs</h3>
+
+                <p>
+                    The following user-entered operating
+                    variables are used to generate predictions:
+                </p>
+
+                <ul class="feature-list">
+
+                    <li>
+                        <span class="feature-dot"></span>
+                        MgCl₂ dosing (L/min)
+                    </li>
+
+                    <li>
+                        <span class="feature-dot"></span>
+                        NaOH dosing (L/min)
+                    </li>
+
+                    <li>
+                        <span class="feature-dot"></span>
+                        Feed orthophosphate (mg/L)
+                    </li>
+
+                    <li>
+                        <span class="feature-dot"></span>
+                        Temperature (°C)
+                    </li>
+
+                </ul>
+
+            </div>
+
+            <div class="info-section">
+
+                <h3>What About Recycle Flow?</h3>
+
+                <p>
+                    Recycle flow is recorded and saved with
+                    each scenario, but it does not currently
+                    influence the machine learning prediction.
+                </p>
+
+            </div>
+
+            <div class="info-section">
+
+                <h3>Understanding the Baseline</h3>
+
+                <p>
+                    Predictions are compared against a fixed
+                    historical model baseline rather than
+                    real-time reactor measurements.
+                </p>
+
+            </div>
+
+            <div class="important-note">
+
+                <strong>
+                    Important: Research Prototype
+                </strong>
+
+                <p>
+                    Predictions represent statistical
+                    associations, not guaranteed outcomes
+                    from changing operating conditions.
+                    Historical ranges are not recommended
+                    operating conditions, and being within
+                    each range does not guarantee that an
+                    input combination is reliable.
+                </p>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- ===== RESEARCH DISCLAIMER ===== -->
+
+    <p class="bottom-note">
+        RecoverIQ is a research prototype. Model predictions
+        are generated from historical operating data and saved
+        with each scenario. No commands are sent to physical
+        reactor equipment. Predictions should not be used as
+        operational recommendations without further validation.
     </p>
 
-    <div style="
-        padding: 14px;
-        margin: 15px 0 20px 0;
-        background-color: #f0f7ff;
-        border-left: 4px solid #2563eb;
-        border-radius: 5px;
-        line-height: 1.6;
-    ">
-        <strong>About this prediction model</strong>
-
-        <p style="margin: 8px 0 0 0;">
-            RecoverIQ uses a Ridge Regression model trained on
-            historical struvite reactor operating data to estimate
-            phosphorus conversion.
-
-            Predictions are preliminary and represent statistical
-            associations, not guaranteed outcomes from changing
-            chemical doses or other operating conditions.
-
-            The model currently uses a fixed historical baseline
-            rather than live reactor measurements.
-
-            Predictions outside historical operating ranges may
-            be unreliable.
-        </p>
-    </div>
-
-    <div class="card">
-
-        <form method="post">
-            {% csrf_token %}
-
-            {% for field in form %}
-                <div class="field">
-                    <label for="{{ field.id_for_label }}">
-                        {{ field.label }}
-                    </label>
-
-                    {{ field }}
-
-                    {% if field.errors %}
-                        {{ field.errors }}
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            {% if form.non_field_errors %}
-                {{ form.non_field_errors }}
-            {% endif %}
-
-            <button type="submit">Save Scenario</button>
-        </form>
-    </div>
-
-
-<p class="note">
-    RecoverIQ is a research prototype. Model predictions are
-    generated from historical data and saved with each scenario.
-    Recycle flow is recorded but does not currently influence
-    the prediction. No changes are sent to physical reactor
-    equipment. Predictions should not be used as operational
-    recommendations without further validation.
-</p>
-
 </main>
+
+<!-- ===== LIVE RANGE VALIDATION JAVASCRIPT ===== -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    /*
+     * RecoverIQ Live Historical Range Feedback
+     *
+     * Checks the four adjustable ML prediction inputs.
+     * Does not alter Django form validation, backend
+     * prediction logic, or scenario persistence.
+     */
+
+    const historicalRanges = {
+        mgcl2_flow_lpm: {
+            label: "MgCl₂",
+            min: 0.119,
+            max: 0.809,
+            unit: "L/min"
+        },
+
+        naoh_flow_lpm: {
+            label: "NaOH",
+            min: 0.117,
+            max: 0.710,
+            unit: "L/min"
+        },
+
+        feed_op_mg_l: {
+            label: "Feed OP",
+            min: 60.607,
+            max: 175.021,
+            unit: "mg/L as P"
+        },
+
+        temperature_c: {
+            label: "Temperature",
+            min: 10.272,
+            max: 22.701,
+            unit: "°C"
+        }
+    };
+
+    const fieldStates = {};
+
+    const summaryCount =
+        document.getElementById("summary-count");
+
+    const summaryMessage =
+        document.getElementById("summary-message");
+
+    const summaryProgress =
+        document.getElementById("summary-progress");
+
+    const summaryProgressFill =
+        document.getElementById("summary-progress-fill");
+
+    const totalFields =
+        Object.keys(historicalRanges).length;
+
+    /*
+     * Update the overall input summary.
+     */
+
+    function updateSummary() {
+
+        const states = Object.values(fieldStates);
+
+        const validCount = states.filter(
+            state => state === "valid"
+        ).length;
+
+        const warningCount = states.filter(
+            state => state === "warning"
+        ).length;
+
+        const missingCount = states.filter(
+            state => state === "missing"
+        ).length;
+
+        summaryCount.textContent =
+            `${validCount} / ${totalFields}`;
+
+        summaryProgressFill.style.width =
+            `${(validCount / totalFields) * 100}%`;
+
+        summaryProgress.setAttribute(
+            "aria-valuenow",
+            validCount
+        );
+
+        if (validCount === totalFields) {
+
+            summaryMessage.textContent =
+                "All four ML inputs are within their individual " +
+                "historical training ranges.";
+
+        } else if (warningCount > 0) {
+
+            summaryMessage.textContent =
+                `${warningCount} input(s) outside historical ` +
+                `ranges or invalid. ${missingCount} input(s) ` +
+                "still missing.";
+
+        } else if (validCount > 0) {
+
+            summaryMessage.textContent =
+                `${validCount} of ${totalFields} ML inputs ` +
+                "are within their historical ranges. " +
+                `${missingCount} still missing.`;
+
+        } else {
+
+            summaryMessage.textContent =
+                "Enter operating values to check " +
+                "their historical training ranges.";
+        }
+    }
+
+    /*
+     * Configure each ML input.
+     */
+
+    Object.entries(historicalRanges).forEach(
+        ([fieldName, range]) => {
+
+            const input = document.querySelector(
+                `[name="${fieldName}"]`
+            );
+
+            const chip = document.getElementById(
+                `chip-${fieldName}`
+            );
+
+            if (!input || !chip) {
+                fieldStates[fieldName] = "missing";
+                return;
+            }
+
+            const fieldContainer =
+                input.closest(".field");
+
+            if (!fieldContainer) {
+                fieldStates[fieldName] = "missing";
+                return;
+            }
+
+            /*
+             * Create a feedback message below
+             * the existing historical range hint.
+             */
+
+            const feedback =
+                document.createElement("div");
+
+            feedback.className =
+                "live-range-feedback empty-range";
+
+            feedback.setAttribute(
+                "role",
+                "status"
+            );
+
+            feedback.setAttribute(
+                "aria-live",
+                "polite"
+            );
+
+            const icon =
+                document.createElement("span");
+
+            icon.className = "feedback-icon";
+
+            icon.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+            const message =
+                document.createElement("span");
+
+            feedback.appendChild(icon);
+            feedback.appendChild(message);
+
+            const rangeHint =
+                fieldContainer.querySelector(
+                    ".range-hint"
+                );
+
+            if (rangeHint) {
+
+                rangeHint.insertAdjacentElement(
+                    "afterend",
+                    feedback
+                );
+
+            } else {
+
+                input.insertAdjacentElement(
+                    "afterend",
+                    feedback
+                );
+            }
+
+            /*
+             * Update individual field feedback
+             * and summary chip.
+             */
+
+            function updateField() {
+
+                const rawValue =
+                    input.value.trim();
+
+                input.classList.remove(
+                    "range-valid",
+                    "range-warning"
+                );
+
+                feedback.classList.remove(
+                    "within-range",
+                    "outside-range",
+                    "empty-range"
+                );
+
+                chip.classList.remove(
+                    "valid",
+                    "warning",
+                    "missing"
+                );
+
+                /*
+                 * Missing value
+                 */
+
+                if (rawValue === "") {
+
+                    fieldStates[fieldName] =
+                        "missing";
+
+                    feedback.classList.add(
+                        "empty-range"
+                    );
+
+                    chip.classList.add(
+                        "missing"
+                    );
+
+                    icon.textContent = "ⓘ";
+
+                    message.textContent =
+                        "Enter a value to check its historical range.";
+
+                    chip.textContent =
+                        `${range.label}: Not entered`;
+
+                    updateSummary();
+                    return;
+                }
+
+                const value = Number(rawValue);
+
+                /*
+                 * Invalid numeric value
+                 */
+
+                if (!Number.isFinite(value)) {
+
+                    fieldStates[fieldName] =
+                        "warning";
+
+                    feedback.classList.add(
+                        "outside-range"
+                    );
+
+                    chip.classList.add(
+                        "warning"
+                    );
+
+                    input.classList.add(
+                        "range-warning"
+                    );
+
+                    icon.textContent = "⚠";
+
+                    message.textContent =
+                        "Enter a valid numeric value.";
+
+                    chip.textContent =
+                        `${range.label}: Invalid`;
+
+                    updateSummary();
+                    return;
+                }
+
+                /*
+                 * Historical range check
+                 */
+
+                const withinRange =
+                    value >= range.min &&
+                    value <= range.max;
+
+                if (withinRange) {
+
+                    fieldStates[fieldName] =
+                        "valid";
+
+                    feedback.classList.add(
+                        "within-range"
+                    );
+
+                    chip.classList.add(
+                        "valid"
+                    );
+
+                    input.classList.add(
+                        "range-valid"
+                    );
+
+                    icon.textContent = "✓";
+
+                    message.textContent =
+                        "Within historical training range";
+
+                    chip.textContent =
+                        `${range.label}: Within range`;
+
+                } else {
+
+                    fieldStates[fieldName] =
+                        "warning";
+
+                    feedback.classList.add(
+                        "outside-range"
+                    );
+
+                    chip.classList.add(
+                        "warning"
+                    );
+
+                    input.classList.add(
+                        "range-warning"
+                    );
+
+                    icon.textContent = "⚠";
+
+                    message.textContent =
+                        "Outside historical training range " +
+                        `(${range.min}–${range.max} ${range.unit})`;
+
+                    chip.textContent =
+                        `${range.label}: Outside range`;
+                }
+
+                updateSummary();
+            }
+
+            /*
+             * Live update while typing
+             */
+
+            input.addEventListener(
+                "input",
+                updateField
+            );
+
+            input.addEventListener(
+                "change",
+                updateField
+            );
+
+            /*
+             * Check prefilled values
+             * when the page first loads.
+             */
+
+            updateField();
+        }
+    );
+
+    updateSummary();
+
+});
+</script>
 
 </body>
 </html>

@@ -3,220 +3,1081 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Scenario History | RecoverIQ</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f6;
             margin: 0;
-            color: #193b35;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #f4f7f6;
+            color: #243b35;
+            font-size: 18px;
+            line-height: 1.6;
         }
 
-        header {
-            background: #123f36;
-            color: white;
-            padding: 22px 8%;
+        button,
+        input,
+        select {
+            font-family: inherit;
         }
 
-        nav a {
+        /* ===== SIDEBAR ===== */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 270px;
+            background: #123e37;
+            padding: 30px 18px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 4px 12px 26px;
+            border-bottom: 1px solid rgba(255,255,255,0.16);
+            margin-bottom: 22px;
+        }
+
+        .sidebar-brand h2 {
             color: white;
-            margin-right: 22px;
+            font-size: 31px;
+            font-weight: 800;
+            letter-spacing: -0.7px;
+            margin: 0 0 9px;
+        }
+
+        .sidebar-brand p {
+            color: #a9d9c8;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-nav a {
+            color: #d5e8e0;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 1.4;
+            padding: 15px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(2px);
+        }
+
+        .sidebar-nav a.active {
+            background: #168065;
+            color: white;
+            font-weight: 700;
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            width: 24px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 20px 12px 0;
+            border-top: 1px solid rgba(255,255,255,0.16);
+        }
+
+        .username {
+            color: #d5e8e0;
+            font-size: 17px;
+            line-height: 1.6;
+            display: block;
+            margin-bottom: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-button {
+            width: 100%;
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 7px;
+            padding: 12px 14px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .login-link {
+            display: block;
+            text-align: center;
             text-decoration: none;
         }
 
+        /* ===== MAIN CONTENT ===== */
+
         main {
-            max-width: 1050px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 26px 30px 36px 300px;
+            padding: 0;
+            min-width: 0;
         }
+
+        /* ===== PAGE HEADER ===== */
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            padding: 8px 0 22px;
+            border-bottom: 1px solid #dce5e1;
+            margin-bottom: 24px;
+        }
+
+        .header-content {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .eyebrow {
+            color: #168065;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 9px;
+        }
+
+        .page-header h1 {
+            margin: 0 0 8px;
+            font-size: 40px;
+            font-weight: 800;
+            line-height: 1.25;
+            color: #243b35;
+            letter-spacing: -0.5px;
+        }
+
+        .page-description {
+            margin: 0;
+            color: #687b74;
+            font-size: 20px;
+            line-height: 1.65;
+            max-width: 1100px;
+        }
+
+        .header-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            padding: 15px 21px;
+            border-radius: 9px;
+            background: #168065;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .header-action:hover {
+            background: #116c55;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 14px rgba(22,128,101,0.18);
+        }
+
+        /* ===== HISTORY CARD ===== */
 
         .card {
             background: white;
-            padding: 25px;
+            border: 1px solid #dce5e1;
             border-radius: 12px;
+            padding: 22px;
+            min-width: 0;
+        }
+
+        .table-intro {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .table-intro h2 {
+            font-size: 25px;
+            font-weight: 700;
+            margin: 0;
+            color: #243b35;
+        }
+
+        .scroll-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #60776d;
+            background: #eef5f1;
+            border-radius: 7px;
+            padding: 8px 12px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* ===== TABLE ===== */
+
+        .table-scroll {
+            width: 100%;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #e1e8e5;
+            border-radius: 9px;
+            scrollbar-width: auto;
+            scrollbar-color: #9ab9ac #edf2ef;
+        }
+
+        .table-scroll::-webkit-scrollbar {
+            height: 13px;
+        }
+
+        .table-scroll::-webkit-scrollbar-track {
+            background: #edf2ef;
+            border-radius: 8px;
+        }
+
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #9ab9ac;
+            border: 3px solid #edf2ef;
+            border-radius: 8px;
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
+            min-width: 1850px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 17px;
         }
 
-        th, td {
+        th,
+        td {
             text-align: left;
-            padding: 13px;
+            padding: 18px 16px;
             border-bottom: 1px solid #e1e8e5;
+            vertical-align: middle;
         }
 
         th {
             background: #eaf2ee;
+            color: #36564a;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.5;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 2;
         }
 
-        .note {
-            color: #64746e;
+        td {
+            font-size: 17px;
+            line-height: 1.6;
+            color: #425e53;
+            background: white;
         }
 
-        a {
+        tbody tr:nth-child(even) td {
+            background: #fbfdfc;
+        }
+
+        tbody tr:hover td {
+            background: #eef8f2;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Keep scenario names visible while scrolling */
+
+        th:first-child,
+        td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            min-width: 205px;
+            max-width: 250px;
+            box-shadow: 2px 0 5px rgba(18,62,55,0.05);
+        }
+
+        th:first-child {
+            z-index: 4;
+            background: #eaf2ee;
+        }
+
+        tbody tr:nth-child(even) td:first-child {
+            background: #fbfdfc;
+        }
+
+        tbody tr:hover td:first-child {
+            background: #eef8f2;
+        }
+
+        .scenario-name {
+            font-weight: 700;
+            color: #243b35;
+            overflow-wrap: anywhere;
+        }
+
+        .reactor-name {
+            min-width: 145px;
+            max-width: 200px;
+        }
+
+        .numeric {
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .prediction {
+            color: #16785e;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .positive {
+            color: #15803d;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .negative {
+            color: #b91c1c;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .invalid-result {
+            color: #b42318;
+            font-weight: 700;
+        }
+
+        .unsupported-result {
+            color: #9a5700;
+            font-weight: 700;
+        }
+
+        /* ===== PREDICTION STATUS ===== */
+
+        .status-badge {
+            display: inline-block;
+            padding: 9px 13px;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.5;
+            white-space: nowrap;
+        }
+
+        .status-valid {
+            background: #e8f5ed;
             color: #16785e;
         }
-        .logout-form {
-    display: inline-block;
-    margin-left: 15px;
-}
 
-.logout-button {
-    background: transparent;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 6px;
-    padding: 8px 14px;
-    cursor: pointer;
-}
+        .status-invalid {
+            background: #feeceb;
+            color: #b42318;
+        }
 
-.logout-button:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
+        .status-unsupported {
+            background: #fff3df;
+            color: #9a5700;
+        }
 
-.username {
-    color: #d5e8e0;
-    margin-left: 20px;
-    font-size: 13px;
-}
+        .status-incomplete {
+            background: #edf0f2;
+            color: #65716d;
+        }
+
+        /* ===== MODEL WARNINGS ===== */
+
+        .warning-summary {
+            color: #b45309;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            padding: 7px 0;
+        }
+
+        .warning-summary:hover {
+            color: #8a4506;
+            text-decoration: underline;
+        }
+
+        .warning-details {
+            max-width: 310px;
+            min-width: 240px;
+            margin-top: 10px;
+            overflow-wrap: anywhere;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #745d39;
+            background: #fff9ee;
+            border: 1px solid #f0dfb6;
+            border-radius: 7px;
+            padding: 12px;
+        }
+
+        .warning-details ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .warning-details li {
+            margin-bottom: 8px;
+        }
+
+        .warning-details li:last-child {
+            margin-bottom: 0;
+        }
+
+        .created-date {
+            color: #64746e;
+            font-size: 16px;
+            min-width: 140px;
+            white-space: nowrap;
+        }
+
+        /* ===== EMPTY STATE ===== */
+
+        .empty-state {
+            padding: 48px 20px;
+            text-align: center;
+        }
+
+        .empty-state h3 {
+            font-size: 27px;
+            margin: 0 0 12px;
+            color: #243b35;
+        }
+
+        .empty-state p {
+            color: #687b74;
+            font-size: 19px;
+            line-height: 1.7;
+            margin: 0 0 24px;
+        }
+
+        .empty-link {
+            display: inline-block;
+            background: #168065;
+            color: white;
+            padding: 15px 22px;
+            border-radius: 9px;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+
+        .empty-link:hover {
+            background: #116c55;
+        }
+
+        /* ===== EXPLANATORY NOTES ===== */
+
+        .table-footer {
+            margin-top: 24px;
+            padding: 20px 22px;
+            background: #ffffff;
+            border: 1px solid #dce5e1;
+            border-radius: 9px;
+            color: #64746e;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        .table-footer strong {
+            color: #29463d;
+            font-weight: 700;
+        }
+
+        .research-note {
+            margin-top: 15px;
+            color: #64746e;
+            font-size: 17px;
+            line-height: 1.75;
+        }
+
+        /* ===== RESPONSIVE LAYOUT ===== */
+
+        @media (max-width: 1100px) {
+            .page-header {
+                align-items: flex-start;
+            }
+
+            .header-action {
+                font-size: 17px;
+            }
+        }
+
+        @media (max-width: 950px) {
+            .sidebar {
+                width: 205px;
+                padding: 24px 12px;
+            }
+
+            main {
+                margin: 24px 20px 40px 225px;
+            }
+
+            .sidebar-nav a {
+                font-size: 15px;
+            }
+
+            .page-header h1 {
+                font-size: 30px;
+            }
+
+            .page-description {
+                font-size: 17px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sidebar {
+                width: 165px;
+                padding: 20px 8px;
+            }
+
+            .sidebar-brand h2 {
+                font-size: 20px;
+            }
+
+            .sidebar-nav a {
+                font-size: 13px;
+                padding: 12px 9px;
+                gap: 5px;
+            }
+
+            main {
+                margin: 20px 12px 30px 177px;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .page-header h1 {
+                font-size: 26px;
+            }
+
+            .header-action {
+                width: 100%;
+                text-align: center;
+                white-space: normal;
+            }
+
+            .table-intro h2 {
+                font-size: 21px;
+            }
+
+            .scroll-hint {
+                font-size: 13px;
+            }
+
+            .table-footer,
+            .research-note {
+                font-size: 15px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sidebar-nav a,
+            .header-action,
+            .logout-button,
+            .empty-link {
+                transition: none;
+            }
+
+            .sidebar-nav a:hover,
+            .header-action:hover {
+                transform: none;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-<header>
-    <h2>RecoverIQ</h2>
+<!-- ===== SIDEBAR ===== -->
 
-<nav>
-    <a href="{% url 'dashboard' %}">Dashboard</a>
-    <a href="{% url 'simulator' %}">What-If Simulator</a>
-    <a href="{% url 'scenario_history' %}">Scenario History</a>
+<aside class="sidebar">
 
-    {% if user.is_authenticated %}
-        <span class="username">
-            Signed in as {{ user.username }}
-        </span>
+    <div class="sidebar-brand">
+        <h2>RecoverIQ</h2>
+        <p>Phosphorus Recovery</p>
+    </div>
 
-        <form method="post"
-              action="{% url 'logout' %}"
-              class="logout-form">
-            {% csrf_token %}
-            <button type="submit" class="logout-button">
-                Logout
-            </button>
-        </form>
-    {% else %}
-        <a href="{% url 'login' %}">Login</a>
-    {% endif %}
-</nav>
-</header>
+    <nav class="sidebar-nav" aria-label="Main navigation">
+
+        <a href="{% url 'dashboard' %}">
+            <span class="nav-icon">&#9638;</span>
+            Dashboard
+        </a>
+
+        <a href="{% url 'simulator' %}">
+            <span class="nav-icon">&#9881;</span>
+            What-If Simulator
+        </a>
+
+        <a href="{% url 'scenario_history' %}"
+           class="active"
+           aria-current="page">
+            <span class="nav-icon">&#9776;</span>
+            Scenario History
+        </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+        {% if user.is_authenticated %}
+
+            <span class="username">
+                Signed in as<br>
+                <strong>{{ user.username }}</strong>
+            </span>
+
+            <form method="post"
+                  action="{% url 'logout' %}"
+                  class="logout-form">
+
+                {% csrf_token %}
+
+                <button type="submit"
+                        class="logout-button">
+                    Logout
+                </button>
+
+            </form>
+
+        {% else %}
+
+            <a href="{% url 'login' %}"
+               class="logout-button login-link">
+                Login
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</aside>
+
+<!-- ===== MAIN HISTORY PAGE ===== -->
 
 <main>
-    <h1>Scenario History</h1>
-    <p class="note">
-        Saved operating scenarios for your account.
-    </p>
+
+    <!-- PAGE HEADER -->
+
+    <section class="page-header">
+
+        <div class="header-content">
+
+            <div class="eyebrow">
+                AI-Powered Phosphorus Recovery
+            </div>
+
+            <h1>Scenario History</h1>
+
+            <p class="page-description">
+                Review saved operating scenarios and compare
+                model-predicted phosphorus conversion against
+                the historical baseline. Predictions outside
+                supported operating ranges are flagged
+                for transparency.
+            </p>
+
+        </div>
+
+        <a href="{% url 'simulator' %}"
+           class="header-action">
+            + New What-If Scenario &rarr;
+        </a>
+
+    </section>
+
+    <!-- ===== SCENARIO TABLE ===== -->
 
     <div class="card">
+
         {% if scenarios %}
 
+            <div class="table-intro">
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Scenario</th>
-                        <th>Reactor</th>
-                        <th>MgCl₂ (L/min)</th>
-                        <th>NaOH (L/min)</th>
-                        <th>Feed OP (mg/L)</th>
-                        <th>Baseline Conversion</th>
-                        <th>Predicted Conversion</th>
-                        <th>Predicted Difference (pp)</th>
-                        <th>Model Warnings</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
+                <h2>Saved Operating Scenarios</h2>
 
-                <tbody>
-                    {% for scenario in scenarios %}
+                <span class="scroll-hint">
+                    &#8596; Scroll horizontally to view all columns
+                </span>
+
+            </div>
+
+            <div class="table-scroll"
+                 role="region"
+                 aria-label="Saved scenario comparison table"
+                 tabindex="0">
+
+                <table>
+
+                    <thead>
                         <tr>
-    <td>{{ scenario.name }}</td>
-    <td>{{ scenario.reactor }}</td>
-    <td>{{ scenario.mgcl2_flow_lpm }}</td>
-    <td>{{ scenario.naoh_flow_lpm }}</td>
-    <td>{{ scenario.feed_op_mg_l }}</td>
+                            <th scope="col">Scenario</th>
+                            <th scope="col">Reactor</th>
+                            <th scope="col">MgCl₂<br>(L/min)</th>
+                            <th scope="col">NaOH<br>(L/min)</th>
+                            <th scope="col">Feed OP<br>(mg/L)</th>
+                            <th scope="col">Baseline<br>Conversion</th>
+                            <th scope="col">Predicted<br>Conversion</th>
+                            <th scope="col">Difference<br>(pp)</th>
+                            <th scope="col">Prediction Status</th>
+                            <th scope="col">Model Warnings</th>
+                            <th scope="col">Model Version</th>
+                            <th scope="col">Created</th>
+                        </tr>
+                    </thead>
 
+                    <tbody>
 
-<td>
-    {% if scenario.baseline_conversion_percent is not None %}
-        {{ scenario.baseline_conversion_percent|floatformat:2 }}%
-    {% else %}
-        —
-    {% endif %}
-</td>
+                        {% for scenario in scenarios %}
 
+                            <tr>
 
+                                <!-- SCENARIO NAME -->
 
-    <!-- NEW: Predicted Conversion -->
-    <td>
-        {% if scenario.predicted_conversion_percent is not None %}
-            <strong>
-                {{ scenario.predicted_conversion_percent|floatformat:2 }}%
-            </strong>
+                                <td class="scenario-name">
+                                    {{ scenario.name }}
+                                </td>
+
+                                <!-- REACTOR -->
+
+                                <td class="reactor-name">
+                                    {{ scenario.reactor }}
+                                </td>
+
+                                <!-- OPERATING INPUTS -->
+
+                                <td class="numeric">
+                                    {{ scenario.mgcl2_flow_lpm }}
+                                </td>
+
+                                <td class="numeric">
+                                    {{ scenario.naoh_flow_lpm }}
+                                </td>
+
+                                <td class="numeric">
+                                    {{ scenario.feed_op_mg_l }}
+                                </td>
+
+                                <!-- BASELINE CONVERSION -->
+
+                                <td class="numeric">
+
+                                    {% if scenario.baseline_conversion_percent is not None %}
+
+                                        {{ scenario.baseline_conversion_percent|floatformat:2 }}%
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+                                <!-- PREDICTED CONVERSION -->
+
+                                <td class="numeric">
+
+                                    {% if scenario.display_status == "invalid" %}
+
+                                        <span class="invalid-result">
+                                            Invalid
+                                        </span>
+
+                                    {% elif scenario.display_status == "unsupported" %}
+
+                                        <span class="unsupported-result">
+                                            {{ scenario.predicted_conversion_percent|floatformat:2 }}%
+                                        </span>
+
+                                    {% elif scenario.display_status == "incomplete" %}
+
+                                        —
+
+                                    {% else %}
+
+                                        {% if scenario.predicted_conversion_percent is not None %}
+
+                                            <span class="prediction">
+                                                {{ scenario.predicted_conversion_percent|floatformat:2 }}%
+                                            </span>
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    {% endif %}
+
+                                </td>
+
+                                <!-- DIFFERENCE FROM BASELINE -->
+
+                                <td class="numeric">
+
+                                    {% if scenario.display_status == "invalid" %}
+
+                                        <span class="invalid-result">
+                                            Invalid
+                                        </span>
+
+                                    {% elif scenario.display_status == "unsupported" %}
+
+                                        <span class="unsupported-result">
+                                            Not validated
+                                        </span>
+
+                                    {% elif scenario.display_status == "incomplete" %}
+
+                                        —
+
+                                    {% elif scenario.conversion_difference is not None %}
+
+                                        {% if scenario.conversion_difference > 0 %}
+
+                                            <span class="positive">
+                                                +{{ scenario.conversion_difference|floatformat:2 }} pp
+                                            </span>
+
+                                        {% elif scenario.conversion_difference < 0 %}
+
+                                            <span class="negative">
+                                                {{ scenario.conversion_difference|floatformat:2 }} pp
+                                            </span>
+
+                                        {% else %}
+
+                                            0.00 pp
+
+                                        {% endif %}
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+                                <!-- PREDICTION STATUS -->
+
+                                <td>
+
+                                    {% if scenario.display_status == "invalid" %}
+
+                                        <span class="status-badge status-invalid">
+                                            Invalid prediction
+                                        </span>
+
+                                    {% elif scenario.display_status == "unsupported" %}
+
+                                        <span class="status-badge status-unsupported">
+                                            Outside training ranges
+                                        </span>
+
+                                    {% elif scenario.display_status == "incomplete" %}
+
+                                        <span class="status-badge status-incomplete">
+                                            Incomplete record
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-badge status-valid">
+                                            Within input ranges
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <!-- MODEL WARNINGS -->
+
+                                <td>
+
+                                    {% if scenario.prediction_warnings %}
+
+                                        <details>
+
+                                            <summary class="warning-summary">
+                                                View warnings
+                                            </summary>
+
+                                            <div class="warning-details">
+
+                                                <ul>
+
+                                                    {% for warning in scenario.prediction_warnings %}
+
+                                                        <li>
+                                                            {{ warning }}
+                                                        </li>
+
+                                                    {% endfor %}
+
+                                                </ul>
+
+                                            </div>
+
+                                        </details>
+
+                                    {% else %}
+
+                                        <span style="color:#64746e;">
+                                            None
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <!-- CREATED DATE -->
+                                <!-- MODEL VERSION -->
+
+                                <td>
+                                    {% if scenario.model_version %}
+                                        {{ scenario.model_version }}
+                                    {% else %}
+                                        <span style="color:#64746e;">
+                                            Not recorded
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- CREATED DATE -->
+
+                                <td class="created-date">
+                                    {{ scenario.created_at|date:"M d, Y" }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
         {% else %}
-            —
+
+            <div class="empty-state">
+
+                <h3>No scenarios saved yet</h3>
+
+                <p>
+                    Create your first operating scenario
+                    using the What-If Simulator.
+                </p>
+
+                <a href="{% url 'simulator' %}"
+                   class="empty-link">
+                    Create your first scenario &rarr;
+                </a>
+
+            </div>
+
         {% endif %}
-    </td>
 
-                            <td>
-    {% if scenario.conversion_difference is not None %}
-        {% if scenario.conversion_difference > 0 %}
-            <strong style="color: #15803d;">
-                +{{ scenario.conversion_difference|floatformat:2 }} pp
-            </strong>
-        {% elif scenario.conversion_difference < 0 %}
-            <strong style="color: #b91c1c;">
-                {{ scenario.conversion_difference|floatformat:2 }} pp
-            </strong>
-        {% else %}
-            0.00 pp
-        {% endif %}
-    {% else %}
-        —
-    {% endif %}
-</td>
-
-<td>
-    {% if scenario.prediction_warnings %}
-        <strong style="color: #b45309;">⚠ Outside training range</strong>
-        <ul style="margin: 5px 0; padding-left: 18px;">
-            {% for warning in scenario.prediction_warnings %}
-                <li>{{ warning }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        —
-    {% endif %}
-</td>
-
-
-    <td>{{ scenario.created_at }}</td>
-</tr>
-{% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No scenarios saved yet.</p>
-            <a href="{% url 'simulator' %}">
-                Create your first scenario
-            </a>
-        {% endif %}
     </div>
+
+    <!-- ===== STATUS EXPLANATION ===== -->
+
+    <p class="table-footer">
+
+        <strong>How to interpret prediction status:</strong>
+
+        "Within input ranges" means the individually adjustable
+        inputs fall within historical training ranges; it does
+        not establish predictive reliability.
+
+        "Outside training ranges" identifies unsupported
+        historical inputs.
+
+        "Invalid prediction" identifies a model result outside
+        the physically meaningful 0–100% conversion range.
+
+        Original scenario records remain saved.
+
+    </p>
+
+    <!-- ===== RESEARCH DISCLAIMER ===== -->
+
+    <p class="research-note">
+
+        RecoverIQ is a research prototype. Predictions are
+        statistical estimates based on historical operating
+        data and should not be interpreted as guaranteed
+        reactor performance or operational recommendations.
+
+    </p>
+
 </main>
 
 </body>
