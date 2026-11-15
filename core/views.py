@@ -95,6 +95,7 @@ def scenario_inputs_supported(scenario, baseline_feed_tp):
         return False
 
 
+@login_required(login_url="/admin/login/")
 def dashboard(request):
     observations = (
         ReactorObservation.objects
