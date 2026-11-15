@@ -95,7 +95,7 @@ def scenario_inputs_supported(scenario, baseline_feed_tp):
         return False
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="/accounts/login/")
 def dashboard(request):
     observations = (
         ReactorObservation.objects
@@ -155,7 +155,7 @@ def dashboard(request):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="/accounts/login/")
 def simulator(request):
 
     if request.method == "POST":
