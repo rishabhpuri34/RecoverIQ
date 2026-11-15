@@ -326,3 +326,29 @@ def scenario_history(request):
         "core/scenario_history.html",
         {"scenarios": scenarios}
     )
+
+# Historical XGBoost yield prediction
+@login_required
+def yield_prediction(request):
+    from .yield_predictor import predict_baseline_yield
+
+    try:
+        result = predict_baseline_yield()
+        return render(
+            request,
+            "core/yield_prediction.html",
+            {
+                "prediction": result,
+                "model_error": None,
+            },
+        )
+    except Exception:
+        logger.exception("Historical yield prediction failed")
+        return render(
+            request,
+            "core/yield_prediction.html",
+            {
+                "prediction": None,
+                "model_error": "The yield prediction is currently unavailable.",
+            },
+        )

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Historical Yield Prediction | RecoverIQ</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #203047;
+        }
+        header {
+            background: #123b56;
+            color: white;
+            padding: 22px 8%;
+        }
+        header h1 { margin: 0; }
+        nav { margin-top: 15px; }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 22px;
+        }
+        main {
+            max-width: 950px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 18px rgba(0,0,0,.06);
+        }
+        .value {
+            font-size: 54px;
+            font-weight: bold;
+            color: #087f74;
+            margin: 15px 0;
+        }
+        .muted { color: #64748b; }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+            gap: 16px;
+        }
+        .metric {
+            background: #f4f7fb;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .metric strong {
+            display: block;
+            font-size: 25px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>RecoverIQ</h1>
+    <nav>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'simulator' %}">Conversion Simulator</a>
+        <a href="{% url 'yield_prediction' %}">Yield Prediction</a>
+        <a href="{% url 'scenario_history' %}">Scenario History</a>
+    </nav>
+</header>
+
+<main>
+    <h1>Historical Struvite Yield Prediction</h1>
+    <p class="muted">
+        XGBoost machine learning model using 43 historical process features.
+    </p>
+
+    {% if model_error %}
+        <div class="card">
+            <h2>Prediction unavailable</h2>
+            <p>{{ model_error }}</p>
+        </div>
+    {% elif prediction %}
+        <div class="card">
+            <h2>Predicted Struvite Yield</h2>
+            <div class="value">
+                {{ prediction.predicted_yield_percent|floatformat:2 }}%
+            </div>
+            <p class="muted">
+                Historical baseline: {{ prediction.baseline_date }}
+            </p>
+            <p class="muted">
+                Model: {{ prediction.model_version }}
+            </p>
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Model Performance</h2>
+        <p class="muted">Chronological holdout test (61 observations)</p>
+        <div class="metrics">
+            <div class="metric">
+                Test R²
+                <strong>0.878</strong>
+            </div>
+            <div class="metric">
+                Test RMSE
+                <strong>7.60 pp</strong>
+            </div>
+            <div class="metric">
+                Test MAE
+                <strong>5.47 pp</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>How to Interpret This Prediction</h2>
+        <p>
+            This prediction uses a saved historical baseline containing
+            operating conditions, feed characteristics, and previous
+            conversion and yield measurements.
+        </p>
+        <p>
+            The model estimates historical struvite yield. It has not
+            been validated for causal what-if simulations or operating
+            recommendations.
+        </p>
+    </div>
+</main>
+</body>
+</html>

@@ -4,7 +4,7 @@ import json
 
 import numpy as np
 import pandas as pd
-from xgboost import XGBRegressor
+from xgboost import Booster, DMatrix
 
 
 # ==========================================================
@@ -35,7 +35,7 @@ def load_yield_artifacts():
                 f"Required yield model file not found: {path}"
             )
 
-    model = XGBRegressor()
+    model = Booster()
     model.load_model(str(MODEL_PATH))
 
     with open(METADATA_PATH, "r") as file:
@@ -115,7 +115,11 @@ def predict_yield(feature_updates=None):
 
     X = prepare_yield_features(feature_updates)
 
-    prediction = float(model.predict(X)[0])
+    prediction = float(
+        model.predict(
+            DMatrix(X, feature_names=list(X.columns))
+        )[0]
+    )
 
     if not np.isfinite(prediction):
         raise ValueError(
