@@ -353,3 +353,32 @@ def yield_prediction(request):
                 "model_error": "The yield prediction is currently unavailable.",
             },
         )
+
+
+@login_required(login_url="/accounts/login/")
+def reactor_summary_api(request):
+    from django.http import JsonResponse
+    from django.db.models import Avg
+
+    observations = ReactorObservation.objects.all()
+
+    averages = observations.aggregate(
+        average_conversion=Avg("conversion"),
+        average_yield=Avg("yield_value"),
+    )
+
+    conversion = averages["average_conversion"]
+    yield_value = averages["average_yield"]
+
+    return JsonResponse({
+        "reactor_count": Reactor.objects.count(),
+        "observation_count": observations.count(),
+        "average_conversion_percent": (
+            round(conversion * 100, 2)
+            if conversion is not None else None
+        ),
+        "average_yield_percent": (
+            round(yield_value * 100, 2)
+            if yield_value is not None else None
+        ),
+    })
